@@ -1,4 +1,4 @@
-# symmetric-coalitions-algo
+# symmetric-coalitions
 
 This small repository implements the solutions algorithm for a symmetric coalition formation game as presented
 in the book by Debraj Ray[^1], Chapter 5.2 page 55.
@@ -13,6 +13,8 @@ to execute the algorithm with an example from the book.
 ## Algorithm details
 
 ### Terminology
+
+The focus here is on finding an equilibrium coalition structure under irreversible agreements in symmetric games.
 
 * **symmetric partition functions:** The worth of a coalition in any given partition only depends on the number of players in each coalition. In other words, it does not matter who you team up with, only the sizes of the coalitions that form.
 
