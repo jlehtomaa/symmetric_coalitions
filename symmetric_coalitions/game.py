@@ -92,12 +92,16 @@ class SymmetricGame:
 
         return tuple(sorted(coal, reverse=True))
 
-    def _construct_decision_rule(self):
+    def _construct_decision_rule(self) -> None:
         """Run steps 1-3 of the algorithm on p.55-56 to construct the decision
         rule `t` in the text."""
 
-        # All substructures of players that add up to any positive integer
-        # strictly less than n. Corresponds to \mathbf{n} in the text (p.55).
+        # We apply the algorithm recursively on all substructures of players
+        # that add up to any positive integer strictly less than the total
+        # number of players to determine what is the size of the coalition that
+        # forms next.
+
+        # The subcalitions below corresponds to \mathbf{n} in the text (p.55).
         # For instance, if n=3, subcoalitions = {1: [(1,)], 2: [(2,), (1,1)]}.
         subcoalitions = {i: sorted_integer_partition(i)
                          for i in range(1, self.num_players)}
@@ -113,10 +117,10 @@ class SymmetricGame:
         # already formed), look for the coalition size that forms next.
         for m in reversed(range(self.num_players)): # m \in {n-1, ..., 0}
 
-            # The next coalition size to form must be from the set {1, ..., n-m}.
-            # If n=5 and m = 4, the next coalition is from {1}.
-            # If n=5 and m = 3, the next coalition is from {1, 2}.
-            # etc....
+            # The size of the next coalition that forms must be from the set
+            # {1, ..., n-m}. For example:
+            # If num_players=5 and m = 4, the next coalition is from {1}.
+            # If num_players=5 and m = 3, the next coalition is from {1, 2}.
 
             if m > 0:
                 existing_coals = subcoalitions[m]
@@ -127,23 +131,25 @@ class SymmetricGame:
                 max_worth = -math.inf
                 argmax = None
 
-                # STEP 3: Find the largest integer `t` that maximizes the
-                # (per capita) coalitional worth from the current substructure.
-                for t in range(1, self.num_players-m+1):
+                # STEP 3: Find the largest integer that maximizes the
+                # average worth of the next coalition that forms from the
+                # current substructure. Corresponds to the variable `t` in the
+                # Ray 2007 book.
+                for next_size in range(1, self.num_players-m+1):
 
-                    subcoal = self._concatenate(coalition + (t,))
+                    subcoal = self._concatenate(coalition + (next_size,))
 
                     try:
-                        worth = self.coalition_worths[(t, subcoal)] / t
+                        worth = self.coalition_worths[(next_size, subcoal)] / next_size
                     except KeyError:
                         worth = self.default_payoff
 
                     if worth > max_worth:
                         max_worth = worth
-                        argmax = t
+                        argmax = next_size
 
                     elif worth == max_worth:
-                        argmax = max(argmax, t)
+                        argmax = max(argmax, next_size)
 
                 # Update the decision rule.
                 self.next_coalition[coalition] = (argmax,)
